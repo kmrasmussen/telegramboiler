@@ -18,11 +18,12 @@ async def handle_message(payload: MessagePayload):
         return {
             "status": "success", 
             "message": "Message received successfully",
-            "messageToUser": "Hello user, this is a test message from the backend."  # This will be sent to the user
+            "messageToUser": "Hello user, this is a test message from the local helloworld example backend.",
+            "includeVoiceMessage": True,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
+    
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

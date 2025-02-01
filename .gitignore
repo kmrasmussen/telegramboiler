@@ -7,3 +7,4 @@ __pycache__/
 
 # Voice messages
 voice_messages/
+store/

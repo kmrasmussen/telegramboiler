@@ -8,17 +8,8 @@ services:
     environment:
       - TELEGRAM_BOT_KEY=${TELEGRAM_BOT_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - BACKEND_ENDPOINT=http://aws.kmrasmussen.com/telegramboilerservice1/myendpoint
     volumes:
       - ./voice_messages:/app/voice_messages
       - .:/app
-    depends_on:
-      - helloworldendpoint
-
-  helloworldendpoint:
-    build:
-      context: ./example_endpoints/helloworld
-      dockerfile: Dockerfile
-    volumes:
-      - ./example_endpoints/helloworld:/app
-    ports:
-      - "8000:8000"
+    command: python receiver.py

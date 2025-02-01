@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  receiver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - TELEGRAM_BOT_KEY=${TELEGRAM_BOT_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - BACKEND_ENDPOINT=http://helloworldendpoint:8000/myendpoint
+    volumes:
+      - ./voice_messages:/app/voice_messages
+      - .:/app
+    depends_on:
+      - helloworldendpoint
+
+  helloworldendpoint:
+    build:
+      context: ./example_endpoints/helloworld
+      dockerfile: Dockerfile
+    volumes:
+      - ./example_endpoints/helloworld:/app
+    ports:
+      - "8000:8000"

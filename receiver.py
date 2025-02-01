@@ -23,16 +23,18 @@ from telegram.ext import (
 import openai
 # Local imports
 from receive_voice_msg import get_transcript
+from send_voice_msg import send_voice_message
 
 # Get sensitive environment variables
 TELEGRAM_BOT_KEY = os.getenv('TELEGRAM_BOT_KEY')
-
-# Get application config
-BACKEND_ENDPOINT = config['backend']['endpoint']
+BACKEND_ENDPOINT = os.getenv('BACKEND_ENDPOINT')
 VOICE_STORE_DIR = config['voice']['store_dir']
 REQUIRE_TELEGRAM_USERNAME = config['telegram']['require_username']
 DELETE_VOICE_AFTER_TRANSCRIPTION = config['voice']['delete_after_transcription']
-
+OUTGOING_VOICE_STORE_DIR = config['voice']['outgoing_dir']
+VOICE_MODEL = config['voice']['voice_model']
+VOICE_NAME = config['voice']['voice_name']
+DELETE_TTS_AFTER_SENDING = config['voice']['delete_tts_after_sending']
 # Initialize OpenAI client
 openai_client = openai.OpenAI()
 
@@ -45,6 +47,7 @@ async def send_message_async(bot_token, chat_id, message):
         print(f"Failed to send message: {e}")
 
 async def forward_message_to_backend(message: str, chat_id: int):
+    print('forwarding message to backend', message, chat_id)
     """Send message and chat_id to backend endpoint via POST request.
     
     Args:
@@ -64,9 +67,13 @@ async def forward_message_to_backend(message: str, chat_id: int):
                     print(f"Successfully forwarded message to backend")
                     response_data = await response.json()
                     if response_data.get('messageToUser'):
+                        if response_data.get('includeVoiceMessage'):
+                            await send_voice_message(response_data['messageToUser'], chat_id, TELEGRAM_BOT_KEY, OUTGOING_VOICE_STORE_DIR, openai_client, voice_model=VOICE_MODEL, voice_name=VOICE_NAME, delete_tts_after_sending=DELETE_TTS_AFTER_SENDING)
                         await send_message_async(TELEGRAM_BOT_KEY, chat_id, response_data['messageToUser'])
+                    print(f"Backend response had status {response.status}")
                 else:
-                    print(f"Backend request failed with status {response.status}")
+                    print(f"Backend response had status {response.status}")
+                    await send_message_async(TELEGRAM_BOT_KEY, chat_id, f"Backend response had status {response.status}")
         except Exception as e:
             print(f"Error forwarding message to backend: {e}")
 
@@ -116,8 +123,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             
         metadata_json = {'telegram_message': telegram_message_to_dict(update)}
         text_content = update.message.text
+        print('text_content', text_content)
         await forward_message_to_backend(text_content, update.message.chat.id)
-        await update.message.reply_text(f'Message: {text_content}')
     except Exception as e:
         print(f'Error handling message: {e}')
 
@@ -162,7 +169,7 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT, handle_message))
     app.add_handler(MessageHandler(filters.VOICE, handle_voice))
     
-    print('Starting bot...')
+    print('Starting polling...')
     app.run_polling(poll_interval=3)
 
 if __name__ == '__main__':

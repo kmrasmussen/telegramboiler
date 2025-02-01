@@ -3,7 +3,8 @@ telegram:
 
 voice:
   store_dir: "voice_messages"
+  outgoing_dir: "outgoing_voice_messages"
   delete_after_transcription: true
-
-backend:
-  endpoint: "http://helloworldendpoint:8000/myendpoint"
+  delete_tts_after_sending: false
+  voice_model: "tts-1"
+  voice_name: "alloy"
