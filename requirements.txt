@@ -1,0 +1,7 @@
+python-telegram-bot
+aiohttp
+python-dotenv
+openai
+watchdog
+requests
+pyyaml

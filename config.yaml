@@ -1,0 +1,9 @@
+telegram:
+  require_username: true
+
+voice:
+  store_dir: "voice_messages"
+  delete_after_transcription: true
+
+backend:
+  endpoint: "http://helloworldendpoint:8000/myendpoint"
