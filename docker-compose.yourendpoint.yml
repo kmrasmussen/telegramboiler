@@ -9,7 +9,12 @@ services:
       - TELEGRAM_BOT_KEY=${TELEGRAM_BOT_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - BACKEND_ENDPOINT=http://aws.kmrasmussen.com/telegramboilerservice1/myendpoint
+      - PYTHONUNBUFFERED=1
     volumes:
       - ./voice_messages:/app/voice_messages
       - .:/app
-    command: python receiver.py
+    command: >
+      sh -c "python -u receiver.py"
+    restart: "no"
+    tty: true
+    stdin_open: true
